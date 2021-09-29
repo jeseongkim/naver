@@ -1,0 +1,52 @@
+※ 소스코드의 한글 주석이 깨질 경우, EUC-KR으로 인코딩하여 열어주세요.
+
+과제 1 : HMAC(SHA-256) 알고리즘을 Init / Update / Final 구조로 동작하도록 변경
+
+1-1. HMAC-sha256의 Init/Update/Final 구조 설명 (강의 자료에 있는 그림과 용어 기반으로 설명)
+-- Init
+	"비밀키와 키 길이를 받고" K_prime 을 hmac 구조체의 buf에 저장
+	K_prime을 통해 i key pad(hmac 구조체의 iPAD) 와 o key pad(hmac 구조체의 oPAD)에 저장
+	hmac 구조체의 sha 를 Init 하고 i key pad 업데이트
+
+-- Update
+	데이터와 데이터 길이를 받고 이를 hmac 구조체의 sha에 업데이트
+	(SHA256_Update 가 메시지를 분할 입력 가능하므로 "HMAC_Update도 분할 입력 가능")
+
+-- Final
+	HMAC_Update를 통해 update 된 i key pad와 메시지를 해쉬 취해서 hmac->buf에 저장
+	hmac의 o key pad와 buf에 저장되어 있는 hash sum1 을 통해 hash sum 2를 md에 저장
+	print_Hex를 통해 md에 저장된 256비트 "MAC을 출력"
+
+1-2. HMAC 구조체 선언
+-- CM_main.h 에 아래와 같이 선언
+
+typedef struct hmac_ctx_st {
+	SHA256_CTX sha;
+	unsigned char iPad[64];
+	unsigned char oPad[64];
+	unsigned char buf[64];
+} HMAC_CTX;
+
+1-3. Update : 메시지 분할 입력 가능
+-- HMAC_SHA_256_KAT() 함수의 4번째 Test Case 를 메시지 분할 입력으로 만들어서 테스트 함
+
+
+
+과제 2 : 다음의 상태 천이도에 따라 동작하는 암호모듈 개발
+2-1. 상태천이도(제성) 그림에 각 상태의 상태명과 천이에 사용된 함수명을 작성하였습니다.
+-- 그림에 추가 내용.
+	1) 심각한 오류 상태일 때, 전원꺼짐 상태로 천이 가능하게 추가 하였습니다.
+
+2-2. 동작 전 자가시험의 Integrity_Check 에서 HMAC이 사용되므로 Integrity_Check 전에 HMAC의 조건부 자가 시험을 먼저 시행하게 했습니다.
+
+2-3. 암호모듈이 제공하는 암호 연산 서비스(AES-CBC, SHA-256, HMAC-SHA256)가 [검증대상 동작모드] 상태에서만 서비스 호출 가능
+-- 암호 연산 서비스 CM_Service 함수 실행 시 (상태 == 검증대상 동작모드)인지 확인하게 했습니다.
+
+2-4. 암호 서비스 (최초) 수행 전 조건부 자가시험(KAT) 수행
+-- 암호 서비스 수행 전, 암호 연산 서비스 상태 구조체를 통해 최초 수행인 지 확인하였습니다.
+
+2-5. 심각한 오류 상태에서 서비스 제공 및 데이터 출력 금지
+-- 각 함수 실행 시 상태를 확인하고 작동하게 했습니다
+
+2-5. 조건부 자가시험 실패한 암호 서비스 제공 금지
+-- 암호 서비스 수행 전에, 기존에 조건부 자가시험에 실패했는 지 확인하게 하였습니다.
