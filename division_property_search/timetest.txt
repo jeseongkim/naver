@@ -1,0 +1,4 @@
+WorkingTime: 0:15:18.928862 sec
+valid : WorkingTime: 0:14:06.817817 sec
+valid : WorkingTime: 0:00:26.492128 sec
+valid : WorkingTime: 0:07:51.177687 sec
